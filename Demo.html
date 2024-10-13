@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRMS Payroll Software Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: royalblue; /* Set background color to Royal Blue */
+            color: white;
+            padding: 10px 20px; /* Added padding on the left and right */
+            display: flex;
+            align-items: center; /* Align items vertically */
+            justify-content: space-between; /* Space between logo and buttons */
+            position: relative; /* Position for animation */
+            overflow: hidden; /* Hide overflow for animation effect */
+        }
+        .header-title {
+            flex-grow: 1; /* Allow title to take available space */
+            text-align: center; /* Center the title */
+            margin: 0; /* Remove default margin */
+            animation: moveTitle 5s linear forwards; /* Animation for title movement */
+            position: absolute; /* Position for animation */
+            white-space: nowrap; /* Prevent line breaks */
+            right: 100%; /* Start position off the right side */
+        }
+        @keyframes moveTitle {
+            0% {
+                right: 100%; /* Start off-screen */
+            }
+            70% {
+                right: calc(50% - 75px); /* Stop at the center (adjust 75px for half title width) */
+            }
+            100% {
+                right: calc(50% - 75px); /* Stay at center */
+            }
+        }
+        header img {
+            max-width: 150px; /* Adjust the size as needed */
+            height: auto; /* Maintain aspect ratio */
+            margin-right: 20px; /* Space between logo and title */
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #333;
+        }
+        nav a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .attendance {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        button.sign-out {
+            background-color: #f44336;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        /* Styles for login and registration forms */
+        .login-container, .register-container {
+            display: none; /* Hide by default */
+            max-width: 400px;
+            margin: 100px auto; /* Center the form */
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        .login-container h2, .register-container h2 {
+            text-align: center;
+        }
+        .login-container input, .register-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-container button, .register-container button {
+            width: 100%;
+        }
+        .message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+    <script>
+        // Global array to store attendance logs
+        let attendanceLog = [];
+
+        // Array to store registered users
+        const users = []; // To store user credentials
+
+        function signIn() {
+            // Show login form when Sign In button is clicked
+            document.querySelector('.login-container').style.display = 'block';
+            document.querySelector('.register-container').style.display = 'none'; // Hide registration form
+        }
+
+        function signOut() {
+            const currentDateTime = new Date();
+            const signOutTime = currentDateTime.toLocaleString();
+            document.getElementById("sign-out-message").innerHTML = `You have signed out on ${signOutTime}`;
+            document.getElementById("sign-out-message").style.display = "block";
+            addLogEntry('Sign Out', signOutTime);
+        }
+
+        // Function to add attendance log entry
+        function addLogEntry(type, time) {
+            // Add log entry to global array
+            attendanceLog.push({ type: type, time: time });
+            // Store the log in local storage so it can be accessed by the new page
+            localStorage.setItem('attendanceLog', JSON.stringify(attendanceLog));
+        }
+
+        // Function to open attendance log in new tab
+        function openAttendanceLog() {
+            window.open('attendance-log.html', '_blank');
+        }
+
+        // Function to open Form 16 in new tab
+        function openForm16() {
+            window.open('form16.html', '_blank');
+        }
+
+        // Function to handle login
+        function handleLogin(event) {
+            event.preventDefault(); // Prevent form submission
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+
+            // Check for valid credentials
+            const user = users.find(user => user.username === username && user.password === password);
+            if (user) {
+                document.querySelector('.login-container').style.display = 'none';
+                document.getElementById('login-message').innerHTML = '';
+                // Display the main content after successful login
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                document.getElementById('login-message').innerHTML = 'Invalid username or password!';
+            }
+        }
+
+        // Function to show registration form
+        function showRegistrationForm() {
+            document.querySelector('.register-container').style.display = 'block';
+            document.querySelector('.login-container').style.display = 'none'; // Hide login form
+        }
+
+        // Function to handle registration
+        function handleRegistration(event) {
+            event.preventDefault(); // Prevent form submission
+            const username = document.getElementById("register-username").value;
+            const password = document.getElementById("register-password").value;
+
+            // Check if the user already exists
+            const existingUser = users.find(user => user.username === username);
+            if (existingUser) {
+                document.getElementById('register-message').innerHTML = 'Username already taken!';
+            } else {
+                // Add new user to the users array
+                users.push({ username: username, password: password });
+                document.getElementById('register-message').innerHTML = 'Registration successful! You can now log in.';
+                // Clear the registration form
+                document.getElementById("register-username").value = '';
+                document.getElementById("register-password").value = '';
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <img src="logo.png" alt="Company Logo"> <!-- Logo added here -->
+        <h1 class="header-title">HRMS Payroll Software</h1> <!-- Title centered -->
+        
+        <!-- Attendance buttons -->
+        <div class="attendance">
+            <button onclick="signIn()">Sign In</button> <!-- Click triggers login form -->
+            <button class="sign-out" onclick="signOut()">Sign Out</button>
+            <button onclick="showRegistrationForm()">Register</button> <!-- Button to show registration form -->
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="dashboard.html" target="_blank">Dashboard</a>
+        <a href="company-info.html" target="_blank">Company Info</a>
+        <a href="employee-details.html" target="_blank">Employee Details</a>
+        <a href="payslip.csv" target="_blank">Payslip</a> <!-- Changed to link to CSV with target="_blank" -->
+        <a href="#" onclick="openForm16()">Form 16</a>
+        <a href="#" onclick="openAttendanceLog()">Attendance Log</a>
+    </nav>
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h2>User Login</h2>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-username" placeholder="Username" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="login-message" class="message"></div>
